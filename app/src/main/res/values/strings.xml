@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Lost Pet</string>
+
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="pet_image">Pet Image</string>
+    <string name="pet_rescued">Pet Rescued</string>
+    <string name="all">All</string>
+    <string name="found">Found</string>
+    <string name="lost">Lost</string>
+    <string name="last_location">Last location at</string>
+    <string name="on">on</string>
+    <string name="never">(never)</string>
+    <string name="pet_name">Pet name</string>
+    <string name="pet_description">Pet description</string>
+    <string name="touch_to_choose_an_image">Touch to choose an image</string>
+</resources>
