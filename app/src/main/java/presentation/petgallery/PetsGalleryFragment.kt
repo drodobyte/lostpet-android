@@ -2,14 +2,14 @@ package presentation.petgallery
 
 import android.os.Bundle
 import android.view.View
+import com.drodobyte.coreandroid.x.onBackPressed
+import com.drodobyte.coreandroid.x.onIO
 import com.drodobyte.lostpet.R
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
 import kotlinx.android.synthetic.main.pets_gallery_fragment.*
 import util.AppFragment
-import util.onBackPressed
-import util.onIO
 
 class PetsGalleryFragment : AppFragment(), PetsGalleryView, PetsGalleryService {
     override fun layout() = R.layout.pets_gallery_fragment

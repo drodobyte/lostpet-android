@@ -1,11 +1,11 @@
 package service
 
 import android.content.Context
+import com.drodobyte.coreandroid.x.onIO
 import entity.Pet
 import io.reactivex.Maybe
 import io.reactivex.Observable
 import io.reactivex.Single
-import util.onIO
 
 class AndroidPetService(context: Context) : PetService {
 

@@ -6,12 +6,16 @@ import android.os.Bundle
 import android.view.View
 import androidx.core.app.ActivityCompat.requestPermissions
 import androidx.core.content.ContextCompat.checkSelfPermission
+import com.drodobyte.coreandroid.x.moveTo
+import com.drodobyte.coreandroid.x.moveToUser
+import com.drodobyte.coreandroid.x.onBackPressed
 import com.drodobyte.lostpet.R
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
 import entity.Location
 import io.reactivex.subjects.PublishSubject
-import util.*
+import util.AppFragment
+import util.toLocation
 
 class PetLocationFragment : AppFragment(), PetLocationView, PetLocationService {
     override fun layout() = R.layout.pet_location_fragment
@@ -34,7 +38,7 @@ class PetLocationFragment : AppFragment(), PetLocationView, PetLocationService {
     }
 
     override fun showLocation(location: Location) =
-        map.moveTo(location, true)
+        with(location) { map.moveTo(x, y, z, true) }
 
     override fun selectedLocation() =
         map.cameraPosition.toLocation().copy(date = petLocation().date)

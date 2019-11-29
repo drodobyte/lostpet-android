@@ -8,11 +8,17 @@ import case.Checker.Error.NameEmpty
 import case.SavePetCase
 import case.ShowPetCase
 import com.drodobyte.core.kotlin.check.Check.Ex
+import com.drodobyte.coreandroid.x.onBackPressed
+import com.drodobyte.coreandroid.x.xDate
+import com.drodobyte.coreandroid.x.xFormatted
+import com.drodobyte.coreandroid.x.xShow
 import com.drodobyte.lostpet.R
 import entity.Pet
 import io.reactivex.subjects.PublishSubject.create
 import kotlinx.android.synthetic.main.pet_fragment.*
-import util.*
+import util.AppFragment
+import util.xLoadPet
+import util.xShowDialog
 
 class PetFragment : AppFragment(), PetView {
 
