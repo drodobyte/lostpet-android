@@ -6,6 +6,7 @@ import android.view.View
 import app.Container
 import case.ListPetSummariesCase
 import case.ListPetSummariesCase.PetSummary
+import com.drodobyte.coreandroid.x.onBackPressed
 import com.drodobyte.lostpet.R
 import io.reactivex.subjects.PublishSubject.create
 import kotlinx.android.synthetic.main.pets_fragment.*
@@ -53,6 +54,7 @@ class PetsFragment : AppFragment(), PetSummariesView {
         adapter = PetsAdapter { clickedPetSummary.onNext(it.id!!) }
         petsView.adapter = adapter
         add_pet.setOnClickListener { clickedNewPet.onNext(Any()) }
+        requireActivity().onBackPressed { activity?.finish() }
         visible.onNext(Any())
     }
 
