@@ -14,7 +14,7 @@ import java.util.*
 fun ImageView.xLoadPetIcon(url: String) =
     Picasso.get()
         .load(if (url.isBlank()) "_undef_" else url)
-        .resize(140, 140)
+        .resize(150, 150)
         .centerCrop()
         .error(R.drawable.ic_alert_error)
         .placeholder(R.drawable.ic_downloading)
