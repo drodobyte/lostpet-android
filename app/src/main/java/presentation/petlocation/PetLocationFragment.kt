@@ -12,6 +12,7 @@ import com.drodobyte.coreandroid.x.onBackPressed
 import com.drodobyte.lostpet.R
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.MarkerOptions
 import entity.Location
 import io.reactivex.subjects.PublishSubject
 import util.AppFragment
@@ -24,6 +25,7 @@ class PetLocationFragment : AppFragment(), PetLocationView, PetLocationService {
     private val clickedBack = PublishSubject.create<Any>()
     private lateinit var map: GoogleMap
     private var granted: Boolean = false
+    private val marker = MarkerOptions()
 
     override fun visible(action: () -> Unit) =
         visible.xSubscribe(action)
@@ -56,7 +58,12 @@ class PetLocationFragment : AppFragment(), PetLocationView, PetLocationService {
     override fun onViewCreated(view: View, saved: Bundle?) {
         PetLocationPresenter(this, this)
         (childFragmentManager.findFragmentById(R.id.mapFragment) as SupportMapFragment).getMapAsync {
-            this.map = it
+            map = it
+            map.setOnCameraIdleListener {
+                map.clear()
+                marker.position(map.cameraPosition.target)
+                map.addMarker(marker)
+            }
             visible.onNext(Any())
         }
         requireActivity().onBackPressed {
