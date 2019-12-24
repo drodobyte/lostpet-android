@@ -9,9 +9,10 @@ import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
 import kotlinx.android.synthetic.main.pets_gallery_fragment.*
+import presentation.petgallery.PetsGalleryPresenter.Service
 import util.AppFragment
 
-class PetsGalleryFragment : AppFragment(), PetsGalleryView, PetsGalleryService {
+class PetsGalleryFragment : AppFragment(), PetsGalleryPresenter.View, Service {
     override fun layout() = R.layout.pets_gallery_fragment
 
     private val visible = PublishSubject.create<Any>()

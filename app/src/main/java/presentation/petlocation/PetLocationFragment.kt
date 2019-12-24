@@ -15,10 +15,11 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.MarkerOptions
 import entity.Location
 import io.reactivex.subjects.PublishSubject
+import presentation.petlocation.PetLocationPresenter.Service
 import util.AppFragment
 import util.toLocation
 
-class PetLocationFragment : AppFragment(), PetLocationView, PetLocationService {
+class PetLocationFragment : AppFragment(), PetLocationPresenter.View, Service {
     override fun layout() = R.layout.pet_location_fragment
 
     private val visible = PublishSubject.create<Any>()

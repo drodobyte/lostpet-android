@@ -4,9 +4,9 @@ import case.SavePetCase
 import case.ShowPetCase
 import entity.Pet
 import io.reactivex.Single
+import presentation.pet.PetPresenter.Service
 
-class PetCaseService(val showCase: ShowPetCase, val saveCase: SavePetCase) :
-    PetService {
+class PetCaseService(val showCase: ShowPetCase, val saveCase: SavePetCase) : Service {
 
     override fun newPet() = Single.just(Pet(null))
 

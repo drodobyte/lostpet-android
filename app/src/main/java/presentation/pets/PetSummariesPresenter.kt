@@ -2,9 +2,9 @@ package presentation.pets
 
 import case.ListPetSummariesCase.PetSummary
 import io.reactivex.Observable
-import presentation.pets.Filter.*
+import presentation.pets.PetSummariesPresenter.Filter.*
 
-class PetSummariesPresenter(view: PetSummariesView, service: PetSummariesService) {
+class PetSummariesPresenter(view: View, service: Service) {
     init {
         view.visible {
             service.allPetsWithOneDummy().toList().subscribe(
@@ -27,23 +27,23 @@ class PetSummariesPresenter(view: PetSummariesView, service: PetSummariesService
             view.showPet(it)
         }
     }
-}
 
-enum class Filter {
-    All, Found, Lost
-}
+    interface View {
+        fun visible(action: () -> Unit)
+        fun clickedFilter(action: (Filter) -> Unit)
+        fun clickedPetSummary(action: (id: Long) -> Unit)
+        fun clickedNewPet(action: () -> Unit)
+        fun showSummaries(summaries: List<PetSummary>)
+        fun showPet(id: Long?)
+    }
 
-interface PetSummariesView {
-    fun visible(action: () -> Unit)
-    fun clickedFilter(action: (Filter) -> Unit)
-    fun clickedPetSummary(action: (id: Long) -> Unit)
-    fun clickedNewPet(action: () -> Unit)
-    fun showSummaries(summaries: List<PetSummary>)
-    fun showPet(id: Long?)
-}
+    interface Service {
+        fun allPetsWithOneDummy(): Observable<PetSummary>
+        fun foundPets(): Observable<PetSummary>
+        fun lostPets(): Observable<PetSummary>
+    }
 
-interface PetSummariesService {
-    fun allPetsWithOneDummy(): Observable<PetSummary>
-    fun foundPets(): Observable<PetSummary>
-    fun lostPets(): Observable<PetSummary>
+    enum class Filter {
+        All, Found, Lost
+    }
 }

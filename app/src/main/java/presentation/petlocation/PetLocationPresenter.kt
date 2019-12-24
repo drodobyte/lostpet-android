@@ -3,7 +3,7 @@ package presentation.petlocation
 import entity.Location
 import java.util.*
 
-class PetLocationPresenter(view: PetLocationView, service: PetLocationService) {
+class PetLocationPresenter(view: View, service: Service) {
     init {
         view.visible {
             with(service.petLocation()) {
@@ -19,18 +19,18 @@ class PetLocationPresenter(view: PetLocationView, service: PetLocationService) {
             view.goBack()
         }
     }
-}
 
-interface PetLocationView {
-    fun visible(action: () -> Unit)
-    fun clickedBack(action: () -> Unit)
-    fun showUserLocation()
-    fun showLocation(location: Location)
-    fun selectedLocation(): Location
-    fun goBack()
-}
+    interface View {
+        fun visible(action: () -> Unit)
+        fun clickedBack(action: () -> Unit)
+        fun showUserLocation()
+        fun showLocation(location: Location)
+        fun selectedLocation(): Location
+        fun goBack()
+    }
 
-interface PetLocationService {
-    fun petLocation(): Location
-    fun savePetLocation(location: Location)
+    interface Service {
+        fun petLocation(): Location
+        fun savePetLocation(location: Location)
+    }
 }

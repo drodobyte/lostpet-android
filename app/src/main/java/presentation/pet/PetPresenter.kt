@@ -4,7 +4,7 @@ import entity.Pet
 import io.reactivex.Maybe
 import io.reactivex.Single
 
-class PetPresenter(view: PetView, service: PetService) {
+class PetPresenter(view: View, service: Service) {
     init {
         view.visiblePet { id, editing ->
             if (editing)
@@ -29,23 +29,23 @@ class PetPresenter(view: PetView, service: PetService) {
                 )
         }
     }
-}
 
-interface PetView {
-    fun visiblePet(action: (id: Long?, editing: Boolean) -> Unit)
-    fun clickedImage(action: (url: String) -> Unit)
-    fun clickedMap(action: () -> Unit)
-    fun clickedBack(action: () -> Unit)
-    fun showPet(pet: Pet)
-    fun showPetGallery()
-    fun showMap()
-    fun showErrorSave(ex: Throwable)
-    fun filledPet(): Pet
-    fun goBack()
-}
+    interface View {
+        fun visiblePet(action: (id: Long?, editing: Boolean) -> Unit)
+        fun clickedImage(action: (url: String) -> Unit)
+        fun clickedMap(action: () -> Unit)
+        fun clickedBack(action: () -> Unit)
+        fun showPet(pet: Pet)
+        fun showPetGallery()
+        fun showMap()
+        fun showErrorSave(ex: Throwable)
+        fun filledPet(): Pet
+        fun goBack()
+    }
 
-interface PetService {
-    fun newPet(): Single<Pet>
-    fun pet(id: Long): Maybe<Pet>
-    fun save(pet: Pet): Single<Pet>
+    interface Service {
+        fun newPet(): Single<Pet>
+        fun pet(id: Long): Maybe<Pet>
+        fun save(pet: Pet): Single<Pet>
+    }
 }

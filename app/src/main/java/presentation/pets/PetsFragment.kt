@@ -10,9 +10,10 @@ import com.drodobyte.coreandroid.x.onBackPressed
 import com.drodobyte.lostpet.R
 import io.reactivex.subjects.PublishSubject.create
 import kotlinx.android.synthetic.main.pets_fragment.*
+import presentation.pets.PetSummariesPresenter.Filter
 import util.AppFragment
 
-class PetsFragment : AppFragment(), PetSummariesView {
+class PetsFragment : AppFragment(), PetSummariesPresenter.View {
     override fun layout(): Int = R.layout.pets_fragment
     override fun menu(): Int = R.menu.options
 

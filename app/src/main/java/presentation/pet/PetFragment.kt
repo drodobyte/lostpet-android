@@ -20,7 +20,7 @@ import util.AppFragment
 import util.xLoadPet
 import util.xShowDialog
 
-class PetFragment : AppFragment(), PetView {
+class PetFragment : AppFragment(), PetPresenter.View {
 
     override fun layout(): Int = R.layout.pet_fragment
 
