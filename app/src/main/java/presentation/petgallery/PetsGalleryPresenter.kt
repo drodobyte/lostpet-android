@@ -3,7 +3,7 @@ package presentation.petgallery
 import io.reactivex.Completable
 import io.reactivex.Observable
 
-class PetsGalleryPresenter(view: View, service: Service) {
+class PetsGalleryPresenter(view: View, service: Service, coordinator: Coordinator) {
     init {
         view.visible {
             service.imageUrls().toList()
@@ -11,11 +11,11 @@ class PetsGalleryPresenter(view: View, service: Service) {
         }
         view.clickedImage {
             service.saveImageUrl(it).subscribe {
-                view.goBack()
+                coordinator.onClickedBack()
             }
         }
         view.clickedBack {
-            view.goBack()
+            coordinator.onClickedBack()
         }
     }
 
@@ -24,11 +24,14 @@ class PetsGalleryPresenter(view: View, service: Service) {
         fun showImages(urls: List<String>)
         fun clickedImage(action: (url: String) -> Unit)
         fun clickedBack(action: () -> Unit)
-        fun goBack()
     }
 
     interface Service {
         fun imageUrls(): Observable<String>
         fun saveImageUrl(url: String): Completable
+    }
+
+    interface Coordinator {
+        fun onClickedBack()
     }
 }

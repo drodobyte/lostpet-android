@@ -13,8 +13,11 @@ import com.drodobyte.lostpet.R
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.MarkerOptions
+import coordinator.Coordinator
 import entity.Location
 import io.reactivex.subjects.PublishSubject
+import org.koin.android.ext.android.inject
+import org.koin.core.parameter.parametersOf
 import presentation.petlocation.PetLocationPresenter.Service
 import util.AppFragment
 import util.toLocation
@@ -22,6 +25,7 @@ import util.toLocation
 class PetLocationFragment : AppFragment(), PetLocationPresenter.View, Service {
     override fun layout() = R.layout.pet_location_fragment
 
+    private val coordinator: Coordinator by inject { parametersOf(this) }
     private val visible = PublishSubject.create<Any>()
     private val clickedBack = PublishSubject.create<Any>()
     private lateinit var map: GoogleMap
@@ -46,9 +50,6 @@ class PetLocationFragment : AppFragment(), PetLocationPresenter.View, Service {
     override fun selectedLocation() =
         map.cameraPosition.toLocation().copy(date = petLocation().date)
 
-    override fun goBack() =
-        go.back()
-
     override fun petLocation() =
         petViewModel.pet.location
 
@@ -57,7 +58,7 @@ class PetLocationFragment : AppFragment(), PetLocationPresenter.View, Service {
     }
 
     override fun onViewCreated(view: View, saved: Bundle?) {
-        PetLocationPresenter(this, this)
+        PetLocationPresenter(this, this, coordinator)
         (childFragmentManager.findFragmentById(R.id.mapFragment) as SupportMapFragment).getMapAsync {
             map = it
             map.setOnCameraIdleListener {

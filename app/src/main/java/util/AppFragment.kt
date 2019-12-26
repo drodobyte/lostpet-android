@@ -6,10 +6,6 @@ import com.drodobyte.coreandroid.ctx.BaseFragment
 
 abstract class AppFragment : BaseFragment() {
 
-    val go: Go by lazy {
-        Go(this)
-    }
-
     val app: App by lazy {
         activity!!.application as App
     }

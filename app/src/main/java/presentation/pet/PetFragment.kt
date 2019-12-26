@@ -12,10 +12,12 @@ import com.drodobyte.coreandroid.x.xDate
 import com.drodobyte.coreandroid.x.xFormatted
 import com.drodobyte.coreandroid.x.xShow
 import com.drodobyte.lostpet.R
+import coordinator.Coordinator
 import entity.Pet
 import io.reactivex.subjects.PublishSubject.create
 import kotlinx.android.synthetic.main.pet_fragment.*
 import org.koin.android.ext.android.inject
+import org.koin.core.parameter.parametersOf
 import service.PetService
 import util.AppFragment
 import util.xLoadPet
@@ -26,13 +28,14 @@ class PetFragment : AppFragment(), PetPresenter.View {
     override fun layout(): Int = R.layout.pet_fragment
 
     private val petService: PetService by inject()
+    private val coordinator: Coordinator by inject { parametersOf(this) }
     private val clickedImage = create<String>()
     private val clickedMap = create<Any>()
     private val clickedBack = create<Any>()
-    private val visiblePet = create<Pair<Long?, Boolean>>()
+    private val visiblePet = create<Boolean>()
 
-    override fun visiblePet(action: (Long?, Boolean) -> Unit) {
-        visiblePet.xSubscribe { (id, editing) -> action(id, editing) }
+    override fun visible(action: (Boolean) -> Unit) {
+        visiblePet.xSubscribe(action)
     }
 
     override fun showPet(pet: Pet) = with(pet) {
@@ -46,25 +49,14 @@ class PetFragment : AppFragment(), PetPresenter.View {
         pet_touch_image_message.xShow(imageUrl.isBlank())
     }
 
-    override fun showPetGallery() {
-        go.petGallery()
-    }
-
-    override fun showMap() {
-        go.petLocation()
-    }
-
-    override fun clickedImage(action: (url: String) -> Unit) {
+    override fun clickedImage(action: (url: String) -> Unit) =
         clickedImage.xSubscribe(action)
-    }
 
-    override fun clickedMap(action: () -> Unit) {
+    override fun clickedMap(action: () -> Unit) =
         clickedMap.xSubscribe(action)
-    }
 
-    override fun clickedBack(action: () -> Unit) {
+    override fun clickedBack(action: () -> Unit) =
         clickedBack.xSubscribe(action)
-    }
 
     override fun showErrorSave(ex: Throwable) {
         if (ex is Ex)
@@ -85,18 +77,14 @@ class PetFragment : AppFragment(), PetPresenter.View {
         petViewModel.pet.location
     )
 
-    override fun goBack() {
-        petViewModel.reset()
-        go.back()
-    }
-
     override fun onViewCreated(view: View, saved: Bundle?) {
         PetPresenter(
             this,
             PetCaseService(
                 ShowPetCase(petService),
                 SavePetCase(petService)
-            )
+            ),
+            coordinator
         )
         pet_image.setOnClickListener {
             clickedImage.onNext(petViewModel.pet.imageUrl)
@@ -115,6 +103,6 @@ class PetFragment : AppFragment(), PetPresenter.View {
         requireActivity().onBackPressed {
             clickedBack.onNext(Any())
         }
-        visiblePet.onNext(Pair(go.args.pet(), !petViewModel.pet.undefined))
+        visiblePet.onNext(!petViewModel.pet.undefined)
     }
 }
