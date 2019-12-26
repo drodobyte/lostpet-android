@@ -3,20 +3,22 @@ package presentation.pets
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
-import app.Container
 import case.ListPetSummariesCase
 import case.ListPetSummariesCase.PetSummary
 import com.drodobyte.coreandroid.x.onBackPressed
 import com.drodobyte.lostpet.R
 import io.reactivex.subjects.PublishSubject.create
 import kotlinx.android.synthetic.main.pets_fragment.*
+import org.koin.android.ext.android.inject
 import presentation.pets.PetSummariesPresenter.Filter
+import service.PetService
 import util.AppFragment
 
 class PetsFragment : AppFragment(), PetSummariesPresenter.View {
     override fun layout(): Int = R.layout.pets_fragment
     override fun menu(): Int = R.menu.options
 
+    private val petService: PetService by inject()
     private val visible = create<Any>()
     private val clickedFilter = create<Filter>()
     private val clickedPetSummary = create<Long>()
@@ -50,7 +52,7 @@ class PetsFragment : AppFragment(), PetSummariesPresenter.View {
     override fun onViewCreated(v: View, saved: Bundle?) {
         PetSummariesPresenter(
             this,
-            PetSummariesCaseService(ListPetSummariesCase(Container.petService))
+            PetSummariesCaseService(ListPetSummariesCase(petService))
         )
         adapter = PetsAdapter { clickedPetSummary.onNext(it.id!!) }
         petsView.adapter = adapter

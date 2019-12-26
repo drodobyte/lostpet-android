@@ -2,7 +2,6 @@ package presentation.pet
 
 import android.os.Bundle
 import android.view.View
-import app.Container
 import case.Checker.Error.ImageEmpty
 import case.Checker.Error.NameEmpty
 import case.SavePetCase
@@ -16,6 +15,8 @@ import com.drodobyte.lostpet.R
 import entity.Pet
 import io.reactivex.subjects.PublishSubject.create
 import kotlinx.android.synthetic.main.pet_fragment.*
+import org.koin.android.ext.android.inject
+import service.PetService
 import util.AppFragment
 import util.xLoadPet
 import util.xShowDialog
@@ -24,6 +25,7 @@ class PetFragment : AppFragment(), PetPresenter.View {
 
     override fun layout(): Int = R.layout.pet_fragment
 
+    private val petService: PetService by inject()
     private val clickedImage = create<String>()
     private val clickedMap = create<Any>()
     private val clickedBack = create<Any>()
@@ -92,8 +94,8 @@ class PetFragment : AppFragment(), PetPresenter.View {
         PetPresenter(
             this,
             PetCaseService(
-                ShowPetCase(Container.petService),
-                SavePetCase(Container.petService)
+                ShowPetCase(petService),
+                SavePetCase(petService)
             )
         )
         pet_image.setOnClickListener {

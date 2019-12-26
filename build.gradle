@@ -7,6 +7,7 @@ buildscript {
     ext.rxjava_version = '2.2.15'
     ext.retrofit_version = "2.6.2"
     ext.room_version = '2.2.2'
+    ext.koin_version = '2.0.1'
 
     repositories {
         google()
