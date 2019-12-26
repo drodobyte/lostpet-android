@@ -21,6 +21,9 @@ internal class DefaultCoordinator(fragment: AppFragment) : Coordinator {
     override fun onClickedPetLocation() =
         go.petLocation()
 
+    override fun onClickedGalleryImage() =
+        go.back()
+
     override fun onClickedBack() =
         go.back()
 }

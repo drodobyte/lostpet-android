@@ -11,7 +11,7 @@ class PetsGalleryPresenter(view: View, service: Service, coordinator: Coordinato
         }
         view.clickedImage {
             service.saveImageUrl(it).subscribe {
-                coordinator.onClickedBack()
+                coordinator.onClickedGalleryImage()
             }
         }
         view.clickedBack {
@@ -32,6 +32,7 @@ class PetsGalleryPresenter(view: View, service: Service, coordinator: Coordinato
     }
 
     interface Coordinator {
+        fun onClickedGalleryImage()
         fun onClickedBack()
     }
 }
