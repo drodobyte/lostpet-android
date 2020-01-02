@@ -13,63 +13,70 @@ import com.drodobyte.lostpet.R
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.MarkerOptions
-import coordinator.Coordinator
-import entity.Location
 import io.reactivex.subjects.PublishSubject
-import org.koin.android.ext.android.inject
-import org.koin.core.parameter.parametersOf
-import presentation.petlocation.PetLocationPresenter.Service
+import presentation.petlocation.PetLocationPresenter.Pos
+import presentation.petlocation.PetLocationViewState.*
 import util.AppFragment
-import util.toLocation
+import util.AppPresenter
+import util.toLatLon
+import util.toPos
 
-class PetLocationFragment : AppFragment(), PetLocationPresenter.View, Service {
+class PetLocationFragment : AppFragment(), PetLocationPresenter.View {
     override fun layout() = R.layout.pet_location_fragment
+    override fun presenter() =
+        PetLocationPresenter(this, PetLocationModel(this::currentPos, petCache), coordinator)
 
-    private val coordinator: Coordinator by inject { parametersOf(this) }
-    private val visible = PublishSubject.create<Any>()
-    private val clickedBack = PublishSubject.create<Any>()
+    private val onVisible = PublishSubject.create<Any>()
+    private val onPosChanged = PublishSubject.create<Pos>()
+    private val onClickedBack = PublishSubject.create<Any>()
     private lateinit var map: GoogleMap
     private var granted: Boolean = false
-    private val marker = MarkerOptions()
+    private val pin = MarkerOptions()
 
-    override fun visible(action: () -> Unit) =
-        visible.xSubscribe(action)
+    override fun onVisible() =
+        onVisible
 
-    override fun clickedBack(action: () -> Unit) =
-        clickedBack.xSubscribe(action)
+    override fun onClickedBack() =
+        onClickedBack
 
-    override fun showUserLocation() {
+    override fun onPosChanged() =
+        onPosChanged
+
+    override fun render(state: PetLocationViewState) {
+        when (state) {
+            is Loading -> renderLoading()
+            is Ready -> renderPos(state.pos)
+            is Updated -> renderPin(state.pos)
+        }
+    }
+
+    private fun renderLoading() {}
+
+    private fun renderPos(pos: Pos) =
+        with(pos) {
+            renderPin(pos)
+            map.moveTo(x, y, z, true)
+        }
+
+    private fun renderPin(pos: Pos) {
+        map.clear()
+        pin.position(pos.toLatLon())
+        map.addMarker(pin)
+    }
+
+    override fun onViewCreated(view: View, saved: Bundle?, presenter: AppPresenter) {
         requestLocationPermission()
-        if (granted)
-            map.moveToUser(context)
-    }
-
-    override fun showLocation(location: Location) =
-        with(location) { map.moveTo(x, y, z, true) }
-
-    override fun selectedLocation() =
-        map.cameraPosition.toLocation().copy(date = petLocation().date)
-
-    override fun petLocation() =
-        petViewModel.pet.location
-
-    override fun savePetLocation(location: Location) {
-        petViewModel.pet = petViewModel.pet.copy(location = location)
-    }
-
-    override fun onViewCreated(view: View, saved: Bundle?) {
-        PetLocationPresenter(this, this, coordinator)
         (childFragmentManager.findFragmentById(R.id.mapFragment) as SupportMapFragment).getMapAsync {
             map = it
-            map.setOnCameraIdleListener {
-                map.clear()
-                marker.position(map.cameraPosition.target)
-                map.addMarker(marker)
+            if (granted)
+                map.moveToUser(context)
+            map.setOnCameraMoveListener {
+                onPosChanged.onNext(currentPos())
             }
-            visible.onNext(Any())
+            onVisible.onNext(Any())
         }
         requireActivity().onBackPressed {
-            clickedBack.onNext(Any())
+            onClickedBack.onNext(Any())
         }
     }
 
@@ -84,7 +91,10 @@ class PetLocationFragment : AppFragment(), PetLocationPresenter.View, Service {
     ) {
         if (code == 0 && results.isNotEmpty() && results[0] == PERMISSION_GRANTED) {
             granted = true
-            map.moveToUser(context)
         }
+    }
+
+    private fun currentPos(): Pos {
+        return map.cameraPosition.toPos()
     }
 }

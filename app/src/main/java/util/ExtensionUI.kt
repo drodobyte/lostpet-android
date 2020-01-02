@@ -1,14 +1,18 @@
 package util
 
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.fragment.app.FragmentManager
 import com.drodobyte.coreandroid.x.asCalendar
 import com.drodobyte.coreandroid.x.asDate
+import com.drodobyte.coreandroid.x.fromDate
 import com.drodobyte.lostpet.R
 import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
 import com.squareup.picasso.Picasso
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog
 import entity.Location
+import presentation.petlocation.PetLocationPresenter.Pos
 import java.util.*
 
 fun ImageView.xLoadPetIcon(url: String) =
@@ -27,20 +31,29 @@ fun ImageView.xLoadPet(url: String) =
         .placeholder(R.drawable.ic_downloading)
         .into(this)
 
-fun Date.xShowDialog(
-    fragmentManager: FragmentManager?, onDateSet: (Date) -> Unit
-) {
-    val now = asCalendar()
+fun FragmentManager.showDateDialog(date: Date, onDateSet: (Date) -> Unit) {
+    val now = date.asCalendar()
     DatePickerDialog.newInstance(
         { _, year, month, day ->
-            val date = Triple(year, month, day).asDate()
-            time = date.time
+            date.time = Triple(year, month, day).asDate().time
             onDateSet(date)
         },
         now.get(Calendar.YEAR), now.get(Calendar.MONTH), now.get(Calendar.DAY_OF_MONTH)
-    ).show(fragmentManager!!, "picker")
+    ).show(this, "picker")
 }
 
-fun CameraPosition.toLocation() = let {
-    Location(Date(), it.target.latitude, it.target.longitude, it.zoom.toDouble())
+fun TextView.onClickRunDateDialog(fragmentManager: FragmentManager) {
+    setOnClickListener {
+        fragmentManager.showDateDialog(text.asDate()) { date ->
+            fromDate(date)
+        }
+    }
 }
+
+fun CameraPosition.toPos() =
+    Pos(target.latitude, target.longitude, zoom.toDouble())
+
+fun Pos.toLatLon() =
+    LatLng(x, y)
+
+fun Location.toPos() = Pos(x, y, z)

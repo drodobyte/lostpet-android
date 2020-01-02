@@ -4,105 +4,98 @@ import android.os.Bundle
 import android.view.View
 import case.Checker.Error.ImageEmpty
 import case.Checker.Error.NameEmpty
-import case.SavePetCase
-import case.ShowPetCase
 import com.drodobyte.core.kotlin.check.Check.Ex
+import com.drodobyte.coreandroid.x.asDate
+import com.drodobyte.coreandroid.x.fromDate
 import com.drodobyte.coreandroid.x.onBackPressed
-import com.drodobyte.coreandroid.x.xDate
-import com.drodobyte.coreandroid.x.xFormatted
-import com.drodobyte.coreandroid.x.xShow
+import com.drodobyte.coreandroid.x.show
 import com.drodobyte.lostpet.R
-import coordinator.Coordinator
+import com.jakewharton.rxbinding2.view.RxView
+import com.jakewharton.rxbinding2.widget.RxTextView
 import entity.Pet
 import io.reactivex.subjects.PublishSubject.create
 import kotlinx.android.synthetic.main.pet_fragment.*
-import org.koin.android.ext.android.inject
-import org.koin.core.parameter.parametersOf
-import service.PetService
+import presentation.pet.PetViewState.*
 import util.AppFragment
+import util.AppPresenter
+import util.onClickRunDateDialog
 import util.xLoadPet
-import util.xShowDialog
+import java.util.concurrent.TimeUnit.SECONDS
 
 class PetFragment : AppFragment(), PetPresenter.View {
 
     override fun layout(): Int = R.layout.pet_fragment
+    override fun presenter() = PetPresenter(this, PetModel(petService, petCache), coordinator)
 
-    private val petService: PetService by inject()
-    private val coordinator: Coordinator by inject { parametersOf(this) }
-    private val clickedImage = create<String>()
-    private val clickedMap = create<Any>()
-    private val clickedBack = create<Any>()
-    private val visiblePet = create<Boolean>()
+    private val onShowPet = create<Any>()
+    private val onClickedBack = create<Any>()
 
-    override fun visible(action: (Boolean) -> Unit) {
-        visiblePet.xSubscribe(action)
+    override fun onShowPet() =
+        onShowPet
+
+    override fun onNameChanged() =
+        RxTextView.textChanges(pet_name)
+            .debounce(1, SECONDS)
+            .map { it.toString() }
+
+    override fun onDescriptionChanged() =
+        RxTextView.textChanges(pet_description)
+            .debounce(1, SECONDS)
+            .map { it.toString() }
+
+    override fun onFoundChanged() =
+        RxView.clicks(pet_found)
+            .map { pet_found.isChecked }
+
+    override fun onDateChanged() =
+        RxTextView.textChanges(pet_location_date)
+            .map { it.asDate() }
+
+    override fun onClickedImage() =
+        RxView.clicks(pet_image)
+
+    override fun onClickedMap() =
+        RxView.clicks(pet_location_pin)
+
+    override fun onClickedBack() =
+        onClickedBack
+
+    override fun render(state: PetViewState) {
+        when (state) {
+            is Loading -> renderLoading()
+            is Ready -> renderPet(state.pet)
+            is Error -> renderError(state.error)
+        }
     }
 
-    override fun showPet(pet: Pet) = with(pet) {
-        petViewModel.pet = copy()
-        pet_name.setText(name)
-        pet_image.xLoadPet(imageUrl)
-        pet_found_icon.xShow(found)
-        pet_found.isChecked = found
-        pet_description.setText(description)
-        pet_location_date.xDate(location.date)
-        pet_touch_image_message.xShow(imageUrl.isBlank())
-    }
-
-    override fun clickedImage(action: (url: String) -> Unit) =
-        clickedImage.xSubscribe(action)
-
-    override fun clickedMap(action: () -> Unit) =
-        clickedMap.xSubscribe(action)
-
-    override fun clickedBack(action: () -> Unit) =
-        clickedBack.xSubscribe(action)
-
-    override fun showErrorSave(ex: Throwable) {
-        if (ex is Ex)
-            when {
-                NameEmpty in ex.errors -> pet_name.error = "Name cannot be empty"
-                ImageEmpty in ex.errors -> showError("Image cannot be empty")
-            }
-        else
-            showError("Undefined error saving pet!")
-    }
-
-    override fun filledPet() = Pet(
-        petViewModel.pet.id,
-        pet_name.text.toString(),
-        pet_description.text.toString(),
-        petViewModel.pet.imageUrl,
-        pet_found.isChecked,
-        petViewModel.pet.location
-    )
-
-    override fun onViewCreated(view: View, saved: Bundle?) {
-        PetPresenter(
-            this,
-            PetCaseService(
-                ShowPetCase(petService),
-                SavePetCase(petService)
-            ),
-            coordinator
-        )
-        pet_image.setOnClickListener {
-            clickedImage.onNext(petViewModel.pet.imageUrl)
-        }
-        pet_location_pin.setOnClickListener {
-            clickedMap.onNext(Any())
-        }
-        pet_location_date.setOnClickListener {
-            petViewModel.pet.location.date.xShowDialog(fragmentManager) {
-                pet_location_date.text = it.xFormatted()
-            }
-        }
+    override fun onViewCreated(view: View, saved: Bundle?, presenter: AppPresenter) {
+        pet_location_date.onClickRunDateDialog(fragmentManager!!)
         pet_found.setOnCheckedChangeListener { _, checked ->
-            pet_found_icon.xShow(checked)
+            pet_found_icon.show(checked)
         }
         requireActivity().onBackPressed {
-            clickedBack.onNext(Any())
+            onClickedBack.onNext(Any())
         }
-        visiblePet.onNext(!petViewModel.pet.undefined)
+        onShowPet.onNext(Any())
+    }
+
+    private fun renderLoading() {}
+
+    private fun renderPet(pet: Pet) = with(pet) {
+        pet_name.setText(name)
+        pet_image.xLoadPet(imageUrl)
+        pet_found_icon.show(found)
+        pet_found.isChecked = found
+        pet_description.setText(description)
+        pet_location_date.fromDate(location.date)
+        pet_touch_image_message.show(imageUrl.isBlank())
+    }
+
+    private fun renderError(ex: Throwable) {
+        if (ex is Ex) when {
+            NameEmpty in ex.errors -> pet_name.error = "Name cannot be empty"
+            ImageEmpty in ex.errors -> showError("Image cannot be empty")
+        } else
+            showError("Undefined error saving pet!")
     }
 }

@@ -12,7 +12,7 @@ internal class DefaultCoordinator(fragment: AppFragment) : Coordinator {
     override fun onClickedPet(id: Long) =
         go.pet(id)
 
-    override fun clickedPetId(): Long? =
+    override fun petId(): Long? =
         go.args.pet()
 
     override fun onClickedPetImage() =

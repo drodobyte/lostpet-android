@@ -3,67 +3,64 @@ package presentation.pets
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
-import case.ListPetSummariesCase
 import case.ListPetSummariesCase.PetSummary
 import com.drodobyte.coreandroid.x.onBackPressed
 import com.drodobyte.lostpet.R
-import coordinator.Coordinator
+import com.jakewharton.rxbinding2.view.RxView
 import io.reactivex.subjects.PublishSubject.create
 import kotlinx.android.synthetic.main.pets_fragment.*
-import org.koin.android.ext.android.inject
-import org.koin.core.parameter.parametersOf
-import presentation.pets.PetSummariesPresenter.Filter
-import service.PetService
+import presentation.pets.PetsPresenter.Filter
+import presentation.pets.PetsPresenter.Filter.*
+import presentation.pets.PetsViewState.*
 import util.AppFragment
+import util.AppPresenter
 
-class PetsFragment : AppFragment(), PetSummariesPresenter.View {
+class PetsFragment : AppFragment(), PetsPresenter.View {
     override fun layout(): Int = R.layout.pets_fragment
     override fun menu(): Int = R.menu.options
+    override fun presenter() = PetsPresenter(this, PetsModel(petService), coordinator)
 
-    private val petService: PetService by inject()
-    private val coordinator: Coordinator by inject { parametersOf(this) }
-    private val visible = create<Any>()
-    private val clickedFilter = create<Filter>()
-    private val clickedPetSummary = create<Long>()
-    private val clickedNewPet = create<Any>()
-    private lateinit var adapter: PetsAdapter
+    private val adapter = PetsAdapter { onClickedPet.onNext(it.id!!) }
+    private val onShowPets = create<Filter>()
+    private val onClickedPet = create<Long>()
 
-    override fun visible(action: () -> Unit) =
-        visible.xSubscribe(action)
+    override fun onShowPets() =
+        onShowPets
 
-    override fun clickedFilter(action: (Filter) -> Unit) =
-        clickedFilter.xSubscribe(action)
+    override fun onClickedNewPet() =
+        RxView.clicks(add_pet)
 
-    override fun clickedPetSummary(action: (id: Long) -> Unit) =
-        clickedPetSummary.xSubscribe(action)
+    override fun onClickedPet() =
+        onClickedPet
 
-    override fun clickedNewPet(action: () -> Unit) =
-        clickedNewPet.xSubscribe(action)
-
-    override fun showSummaries(summaries: List<PetSummary>) {
-        adapter + summaries
+    override fun render(state: PetsViewState) {
+        when (state) {
+            is Loading -> renderLoading()
+            is Ready -> renderPets(state.pets)
+            is Error -> renderError(state.error)
+        }
     }
 
-    override fun onViewCreated(v: View, saved: Bundle?) {
-        PetSummariesPresenter(
-            this,
-            PetSummariesCaseService(ListPetSummariesCase(petService)),
-            coordinator
-        )
-        petViewModel.reset()
-        adapter = PetsAdapter { clickedPetSummary.onNext(it.id!!) }
+    private fun renderLoading() {}
+
+    private fun renderPets(pets: List<PetSummary>) =
+        adapter + pets
+
+    private fun renderError(error: Throwable) =
+        showError("Error loading pets")
+
+    override fun onViewCreated(view: View, saved: Bundle?, presenter: AppPresenter) {
         petsView.adapter = adapter
-        add_pet.setOnClickListener { clickedNewPet.onNext(Any()) }
         requireActivity().onBackPressed { activity?.finish() }
-        visible.onNext(Any())
+        onShowPets.onNext(All)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        clickedFilter.onNext(
+        onShowPets.onNext(
             when (item.itemId) {
-                R.id.all -> Filter.All
-                R.id.found -> Filter.Found
-                else -> Filter.Lost
+                R.id.all -> All
+                R.id.found -> Found
+                else -> Lost
             }
         )
         item.isChecked = true
