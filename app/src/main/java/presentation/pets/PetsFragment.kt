@@ -20,9 +20,8 @@ class PetsFragment : AppFragment(), PetsPresenter.View {
     override fun menu(): Int = R.menu.options
     override fun presenter() = PetsPresenter(this, PetsModel(petService), coordinator)
 
-    private val adapter = PetsAdapter { onClickedPet.onNext(it.id!!) }
+    private val adapter = PetsAdapter()
     private val onShowPets = create<Filter>()
-    private val onClickedPet = create<Long>()
 
     override fun onShowPets() =
         onShowPets
@@ -31,7 +30,8 @@ class PetsFragment : AppFragment(), PetsPresenter.View {
         RxView.clicks(add_pet)
 
     override fun onClickedPet() =
-        onClickedPet
+        adapter.onClickObservable()
+            .map { it.id!! }
 
     override fun render(state: PetsViewState) {
         when (state) {

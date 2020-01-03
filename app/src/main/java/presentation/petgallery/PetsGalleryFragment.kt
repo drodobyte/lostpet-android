@@ -14,14 +14,13 @@ class PetsGalleryFragment : AppFragment(), PetsGalleryPresenter.View {
     override fun presenter() = PetsGalleryPresenter(this, PetsGalleryModel(petCache), coordinator)
 
     private val onVisible = PublishSubject.create<Any>()
-    private val onClickedImage = PublishSubject.create<String>()
-    private val adapter = PetsGalleryAdapter(onClickedImage::onNext)
+    private val adapter = PetsGalleryAdapter()
 
     override fun onVisible() =
         onVisible
 
     override fun onClickedImage() =
-        onClickedImage
+        adapter.onClickObservable()
 
     override fun onClickedBack() =
         requireActivity().backPressObservable()
