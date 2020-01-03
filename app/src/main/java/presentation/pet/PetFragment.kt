@@ -6,8 +6,8 @@ import case.Checker.Error.ImageEmpty
 import case.Checker.Error.NameEmpty
 import com.drodobyte.core.kotlin.check.Check.Ex
 import com.drodobyte.coreandroid.x.asDate
+import com.drodobyte.coreandroid.x.backPressObservable
 import com.drodobyte.coreandroid.x.fromDate
-import com.drodobyte.coreandroid.x.onBackPressed
 import com.drodobyte.coreandroid.x.show
 import com.drodobyte.lostpet.R
 import com.jakewharton.rxbinding2.view.RxView
@@ -28,7 +28,6 @@ class PetFragment : AppFragment(), PetPresenter.View {
     override fun presenter() = PetPresenter(this, PetModel(petService, petCache), coordinator)
 
     private val onShowPet = create<Any>()
-    private val onClickedBack = create<Any>()
 
     override fun onShowPet() =
         onShowPet
@@ -58,7 +57,7 @@ class PetFragment : AppFragment(), PetPresenter.View {
         RxView.clicks(pet_location_pin)
 
     override fun onClickedBack() =
-        onClickedBack
+        requireActivity().backPressObservable()
 
     override fun render(state: PetViewState) {
         when (state) {
@@ -72,9 +71,6 @@ class PetFragment : AppFragment(), PetPresenter.View {
         pet_location_date.onClickRunDateDialog(fragmentManager!!)
         pet_found.setOnCheckedChangeListener { _, checked ->
             pet_found_icon.show(checked)
-        }
-        requireActivity().onBackPressed {
-            onClickedBack.onNext(Any())
         }
         onShowPet.onNext(Any())
     }

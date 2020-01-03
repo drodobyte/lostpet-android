@@ -6,9 +6,9 @@ import android.os.Bundle
 import android.view.View
 import androidx.core.app.ActivityCompat.requestPermissions
 import androidx.core.content.ContextCompat.checkSelfPermission
+import com.drodobyte.coreandroid.x.backPressObservable
 import com.drodobyte.coreandroid.x.moveTo
 import com.drodobyte.coreandroid.x.moveToUser
-import com.drodobyte.coreandroid.x.onBackPressed
 import com.drodobyte.lostpet.R
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
@@ -28,7 +28,6 @@ class PetLocationFragment : AppFragment(), PetLocationPresenter.View {
 
     private val onVisible = PublishSubject.create<Any>()
     private val onPosChanged = PublishSubject.create<Pos>()
-    private val onClickedBack = PublishSubject.create<Any>()
     private lateinit var map: GoogleMap
     private var granted: Boolean = false
     private val pin = MarkerOptions()
@@ -37,7 +36,7 @@ class PetLocationFragment : AppFragment(), PetLocationPresenter.View {
         onVisible
 
     override fun onClickedBack() =
-        onClickedBack
+        requireActivity().backPressObservable()
 
     override fun onPosChanged() =
         onPosChanged
@@ -74,9 +73,6 @@ class PetLocationFragment : AppFragment(), PetLocationPresenter.View {
                 onPosChanged.onNext(currentPos())
             }
             onVisible.onNext(Any())
-        }
-        requireActivity().onBackPressed {
-            onClickedBack.onNext(Any())
         }
     }
 
