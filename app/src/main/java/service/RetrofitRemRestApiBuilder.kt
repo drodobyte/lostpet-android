@@ -13,7 +13,7 @@ import java.net.CookiePolicy
 internal object RetrofitRemRestApiBuilder {
 
     fun <T> create(clazz: Class<T>): T = Retrofit.Builder()
-        .baseUrl("http://rem-rest-api.herokuapp.com/api/")
+        .baseUrl("https://rem.dbwebb.se/api/")
         .client(client)
         .addConverterFactory(GsonConverterFactory.create())
         .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
